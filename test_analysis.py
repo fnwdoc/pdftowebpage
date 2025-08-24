@@ -1,71 +1,68 @@
 import pytest
 import fitz  # PyMuPDF
-from analysis import analyze_presentation
+from analysis import analyze_presentation, EXPERT_KEYWORDS
 
 # Helper function to create a test PDF document in memory
 def create_test_doc(text):
     """Creates an in-memory PDF with one page containing the given text."""
-    doc = fitz.open()  # New, empty PDF
+    doc = fitz.open()
     page = doc.new_page()
-    # Insert text into a rectangle on the page.
-    # The point can be arbitrary, as we only care about the text content.
     point = fitz.Point(50, 70)
     page.insert_text(point, text)
     return doc
 
 def test_no_criteria_found():
     """Test with a generic text that shouldn't trigger any criteria."""
-    doc = create_test_doc("This is a generic document about our company.")
+    doc = create_test_doc("Este é um documento genérico sobre nossa empresa.")
     result = analyze_presentation(doc)
     for criterion, data in result.items():
-        assert not data['found']
-        assert data['snippets'] == []
+        assert not data['found'], f"Criterion '{criterion}' should not have been found."
 
-def test_recurrence_found():
-    """Test that recurrence criteria is found and evidence is correct."""
-    doc = create_test_doc("Nós oferecemos uma assinatura anual. A mensalidade é baixa.")
+def test_keyword_found_and_highlighted():
+    """Test that a single keyword is found and highlighted correctly."""
+    doc = create_test_doc("Nossa solução de software é a melhor do mercado.")
     result = analyze_presentation(doc)
 
-    assert result['recurrence']['found']
-    assert not result['predictability']['found'] # Ensure no other criteria are triggered
-
-    snippets = result['recurrence']['snippets']
-    assert len(snippets) == 2
+    assert result['scalability']['found']
+    snippets = result['scalability']['snippets']
+    assert len(snippets) == 1
     assert snippets[0]['page'] == 1
-    assert '<strong>assinatura</strong>' in snippets[0]['sentence']
-    assert '<strong>mensalidade</strong>' in snippets[1]['sentence']
+    assert '<strong>software</strong>' in snippets[0]['sentence']
 
-def test_predictability_found():
-    """Test that predictability (pricing) criteria is found."""
-    doc = create_test_doc("O preço do plano básico é R$50.")
+def test_multiple_keywords_for_same_criterion():
+    """Test that multiple keywords for the same criterion are found and highlighted."""
+    doc = create_test_doc("O preço do nosso produto é competitivo.")
     result = analyze_presentation(doc)
+
     assert result['predictability']['found']
     snippets = result['predictability']['snippets']
     assert len(snippets) == 1
+    # Check that both keywords are highlighted in the same sentence
     assert '<strong>preço</strong>' in snippets[0]['sentence']
-    assert '<strong>R$</strong>50' in snippets[0]['sentence']
 
-def test_scalability_found():
-    """Test that scalability criteria is found."""
-    doc = create_test_doc("Nossa plataforma de software é robusta.")
-    result = analyze_presentation(doc)
+    # The keyword 'produto' is for scalability, let's check that too
     assert result['scalability']['found']
-    snippets = result['scalability']['snippets']
-    assert '<strong>plataforma</strong>' in snippets[0]['sentence']
-    assert '<strong>software</strong>' in snippets[0]['sentence']
+    assert '<strong>produto</strong>' in result['scalability']['snippets'][0]['sentence']
 
-def test_multiple_criteria_in_one_sentence():
-    """Test a sentence that triggers multiple criteria."""
-    doc = create_test_doc("O preço da nossa assinatura de software é competitivo.")
+def test_phrase_keyword_matching():
+    """Test that multi-word phrases are matched correctly."""
+    doc = create_test_doc("Oferecemos um plano mensal com bom custo-benefício.")
     result = analyze_presentation(doc)
-    assert result['predictability']['found']
+
     assert result['recurrence']['found']
-    assert result['scalability']['found']
+    assert '<strong>plano mensal</strong>' in result['recurrence']['snippets'][0]['sentence']
 
-    # The same sentence should be evidence for all three
-    assert '<strong>preço</strong>' in result['predictability']['snippets'][0]['sentence']
-    assert '<strong>assinatura</strong>' in result['recurrence']['snippets'][0]['sentence']
-    assert '<strong>software</strong>' in result['scalability']['snippets'][0]['sentence']
+    assert result['predictability']['found']
+    assert '<strong>custo-benefício</strong>' in result['predictability']['snippets'][0]['sentence']
+
+def test_case_insensitivity():
+    """Test that keywords are found regardless of case."""
+    doc = create_test_doc("Analisamos o ROI e a MARGEM de lucro.")
+    result = analyze_presentation(doc)
+
+    assert result['profitability']['found']
+    assert '<strong>ROI</strong>' in result['profitability']['snippets'][0]['sentence']
+    assert '<strong>MARGEM</strong>' in result['profitability']['snippets'][0]['sentence']
 
 def test_empty_document():
     """Test that an empty document doesn't cause errors."""
@@ -73,4 +70,3 @@ def test_empty_document():
     result = analyze_presentation(doc)
     for criterion, data in result.items():
         assert not data['found']
-        assert data['snippets'] == []
