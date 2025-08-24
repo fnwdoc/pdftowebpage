@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obrigado pelo Contato!</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 2em; text-align: center; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #28a745; }
+        p { font-size: 1.1em; line-height: 1.6; }
+        .whatsapp-button {
+            display: inline-block;
+            background-color: #25D366;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 1.5em;
+            transition: background-color 0.3s;
+        }
+        .whatsapp-button:hover {
+            background-color: #1DA851;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Obrigado!</h1>
+        <p>Recebemos suas informações com sucesso. Nossa equipe entrará em contato em breve.</p>
+        <p>Se preferir, clique no botão abaixo para iniciar a conversa diretamente pelo WhatsApp e agilizar seu atendimento.</p>
+        <a href="{{ whatsapp_url }}" class="whatsapp-button" target="_blank">
+            Iniciar Conversa no WhatsApp
+        </a>
+    </div>
+</body>
+</html>

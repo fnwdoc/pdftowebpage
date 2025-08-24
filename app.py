@@ -3,6 +3,7 @@ import fitz  # PyMuPDF
 import json
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
+from urllib.parse import quote
 from analysis import analyze_text
 
 UPLOAD_FOLDER = 'uploads'
@@ -85,17 +86,24 @@ def converted_file(filename):
 def handle_contact():
     name = request.form.get('name')
     email = request.form.get('email')
+    whatsapp = request.form.get('whatsapp')
     message = request.form.get('message')
 
-    # For now, we just print the lead's data.
-    # In a real application, this would be sent to a CRM or an email address.
+    # Print lead data to console (server side)
     print(f"--- New Lead ---")
     print(f"Name: {name}")
     print(f"Email: {email}")
+    print(f"WhatsApp: {whatsapp}")
     print(f"Message: {message}")
     print(f"----------------")
 
-    return "Obrigado pelo seu interesse! Entraremos em contato em breve."
+    # --- Prepare WhatsApp Click-to-Chat Link ---
+    business_whatsapp_number = "5511911595028"
+    prefilled_text = f"Olá, meu nome é {name}. Vi o diagnóstico do meu PDF e gostaria de agendar a sessão estratégica."
+    encoded_text = quote(prefilled_text)
+    whatsapp_url = f"https://wa.me/{business_whatsapp_number}?text={encoded_text}"
+
+    return render_template('thank_you.html', whatsapp_url=whatsapp_url)
 
 if __name__ == '__main__':
     for folder in [UPLOAD_FOLDER, CONVERTED_FOLDER, RESULTS_FOLDER]:
