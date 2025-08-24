@@ -4,7 +4,7 @@ import json
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 from urllib.parse import quote
-from analysis import analyze_text
+from analysis import analyze_presentation
 
 UPLOAD_FOLDER = 'uploads'
 CONVERTED_FOLDER = 'converted'
@@ -39,14 +39,15 @@ def upload_file():
 
         # --- PDF Processing and Analysis ---
         doc = fitz.open(pdf_path)
+
+        # 1. Perform 5-criteria analysis
+        analysis_results = analyze_presentation(doc)
+
+        # 2. Generate basic HTML version for preview
         html_content = ""
-        plain_text = ""
         for page in doc:
             html_content += page.get_text("html")
-            plain_text += page.get_text("text")
         doc.close()
-
-        analysis_results = analyze_text(plain_text)
 
         # --- Save artifacts ---
         # 1. Save converted HTML

@@ -1,69 +1,76 @@
 import pytest
-from analysis import analyze_text
+import fitz  # PyMuPDF
+from analysis import analyze_presentation
 
-def test_no_keywords():
-    """Test with text that has no relevant keywords."""
-    text = "This is a simple document about our company services."
-    result = analyze_text(text)
-    assert not result['has_recurrence']
-    assert not result['has_pricing']
-    assert result['recurrence_snippets'] == []
-    assert result['pricing_snippets'] == []
+# Helper function to create a test PDF document in memory
+def create_test_doc(text):
+    """Creates an in-memory PDF with one page containing the given text."""
+    doc = fitz.open()  # New, empty PDF
+    page = doc.new_page()
+    # Insert text into a rectangle on the page.
+    # The point can be arbitrary, as we only care about the text content.
+    point = fitz.Point(50, 70)
+    page.insert_text(point, text)
+    return doc
 
-def test_recurrence_keywords_found():
-    """Test with text containing recurrence keywords."""
-    text = "Oferecemos um plano mensal com vantagens exclusivas. A assinatura é flexível."
-    result = analyze_text(text)
-    assert result['has_recurrence']
-    assert not result['has_pricing']
-    assert len(result['recurrence_snippets']) == 2
-    assert "Oferecemos um plano mensal com vantagens exclusivas" in result['recurrence_snippets']
-    assert "A assinatura é flexível" in result['recurrence_snippets']
+def test_no_criteria_found():
+    """Test with a generic text that shouldn't trigger any criteria."""
+    doc = create_test_doc("This is a generic document about our company.")
+    result = analyze_presentation(doc)
+    for criterion, data in result.items():
+        assert not data['found']
+        assert data['snippets'] == []
 
-def test_pricing_keywords_found():
-    """Test with text containing pricing keywords."""
-    text = "O valor do nosso serviço é de R$ 500. Veja a tabela de preços."
-    result = analyze_text(text)
-    assert not result['has_recurrence']
-    assert result['has_pricing']
-    assert len(result['pricing_snippets']) == 2
-    assert "O valor do nosso serviço é de R$ 500" in result['pricing_snippets']
-    assert "Veja a tabela de preços" in result['pricing_snippets']
+def test_recurrence_found():
+    """Test that recurrence criteria is found and evidence is correct."""
+    doc = create_test_doc("Nós oferecemos uma assinatura anual. A mensalidade é baixa.")
+    result = analyze_presentation(doc)
 
-def test_both_keywords_found():
-    """Test with text containing both recurrence and pricing keywords."""
-    text = "Nosso plano mensal custa R$ 99,90. A assinatura anual tem desconto."
-    result = analyze_text(text)
-    assert result['has_recurrence']
-    assert result['has_pricing']
-    assert len(result['recurrence_snippets']) == 2
-    assert "Nosso plano mensal custa R$ 99,90" in result['recurrence_snippets']
-    assert len(result['pricing_snippets']) == 1
-    assert "Nosso plano mensal custa R$ 99,90" in result['pricing_snippets']
+    assert result['recurrence']['found']
+    assert not result['predictability']['found'] # Ensure no other criteria are triggered
 
+    snippets = result['recurrence']['snippets']
+    assert len(snippets) == 2
+    assert snippets[0]['page'] == 1
+    assert '<strong>assinatura</strong>' in snippets[0]['sentence']
+    assert '<strong>mensalidade</strong>' in snippets[1]['sentence']
 
-def test_case_insensitivity():
-    """Test if the analysis is case-insensitive."""
-    text = "Nosso PLANO MENSAL tem o melhor PREÇO. O VALOR é R$ 100."
-    result = analyze_text(text)
-    assert result['has_recurrence']
-    assert result['has_pricing']
-    assert len(result['recurrence_snippets']) == 1
-    assert "Nosso PLANO MENSAL tem o melhor PREÇO" in result['recurrence_snippets']
-    assert len(result['pricing_snippets']) == 2
+def test_predictability_found():
+    """Test that predictability (pricing) criteria is found."""
+    doc = create_test_doc("O preço do plano básico é R$50.")
+    result = analyze_presentation(doc)
+    assert result['predictability']['found']
+    snippets = result['predictability']['snippets']
+    assert len(snippets) == 1
+    assert '<strong>preço</strong>' in snippets[0]['sentence']
+    assert '<strong>R$</strong>50' in snippets[0]['sentence']
 
-def test_empty_string():
-    """Test with an empty string to ensure it doesn't crash."""
-    text = ""
-    result = analyze_text(text)
-    assert not result['has_recurrence']
-    assert not result['has_pricing']
-    assert result['recurrence_snippets'] == []
-    assert result['pricing_snippets'] == []
+def test_scalability_found():
+    """Test that scalability criteria is found."""
+    doc = create_test_doc("Nossa plataforma de software é robusta.")
+    result = analyze_presentation(doc)
+    assert result['scalability']['found']
+    snippets = result['scalability']['snippets']
+    assert '<strong>plataforma</strong>' in snippets[0]['sentence']
+    assert '<strong>software</strong>' in snippets[0]['sentence']
 
-def test_no_duplicate_snippets():
-    """Test that the same sentence is not added twice."""
-    text = "Nosso plano mensal é bom. Nosso plano mensal é bom."
-    result = analyze_text(text)
-    assert len(result['recurrence_snippets']) == 1
-    assert "Nosso plano mensal é bom" in result['recurrence_snippets']
+def test_multiple_criteria_in_one_sentence():
+    """Test a sentence that triggers multiple criteria."""
+    doc = create_test_doc("O preço da nossa assinatura de software é competitivo.")
+    result = analyze_presentation(doc)
+    assert result['predictability']['found']
+    assert result['recurrence']['found']
+    assert result['scalability']['found']
+
+    # The same sentence should be evidence for all three
+    assert '<strong>preço</strong>' in result['predictability']['snippets'][0]['sentence']
+    assert '<strong>assinatura</strong>' in result['recurrence']['snippets'][0]['sentence']
+    assert '<strong>software</strong>' in result['scalability']['snippets'][0]['sentence']
+
+def test_empty_document():
+    """Test that an empty document doesn't cause errors."""
+    doc = fitz.open() # Empty doc
+    result = analyze_presentation(doc)
+    for criterion, data in result.items():
+        assert not data['found']
+        assert data['snippets'] == []
