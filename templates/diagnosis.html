@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu Pré-Diagnóstico de Negócio</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 2em; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #4a4a4a; text-align: center; }
+        .opportunity, .success {
+            padding: 1em; margin-bottom: 1em; border-radius: 4px;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        .opportunity { background: #fff3cd; border-left: 5px solid #ffeeba; }
+        .opportunity h3 { margin-top: 0; color: #856404; }
+        .success { background: #d4edda; border-left: 5px solid #c3e6cb; }
+        .success h3 { margin-top: 0; color: #155724; }
+        .preview-container { border: 1px solid #ddd; margin-top: 2em; }
+        .preview-header { background-color: #f0f0f0; padding: 0.5em; font-weight: bold; }
+        iframe { width: 100%; height: 500px; border: none; }
+        .contact-section { background: #f8f9fa; padding: 2em; margin-top: 2em; border-radius: 8px; text-align: left; }
+        .contact-section h3 { text-align: center; }
+        form { display: flex; flex-direction: column; gap: 1em; }
+        form input, form textarea { padding: 0.7em; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        form input[type=submit] { background-color: #28a745; color: white; cursor: pointer; font-weight: bold; }
+        form input[type=submit]:hover { background-color: #218838; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pré-Diagnóstico do seu Documento</h1>
+        <p style="text-align: center;">Analisamos seu documento e identificamos as seguintes oportunidades de melhoria para o seu modelo de negócio.</p>
+
+        <h2>Resultados da Análise</h2>
+
+        {% if not analysis.has_recurrence %}
+        <div class="opportunity">
+            <h3>Oportunidade #1: Modelo de Receita Previsível</h3>
+            <p>Não encontramos menções a um modelo de receita recorrente (como assinaturas ou mensalidades). Implementar um modelo assim pode trazer maior previsibilidade e estabilidade para o seu faturamento.</p>
+        </div>
+        {% else %}
+        <div class="success">
+            <h3>Ponto Forte: Modelo de Receita Recorrente</h3>
+            <p>Parabéns! Identificamos que você já utiliza um modelo de receita recorrente. Este é um pilar fundamental para negócios escaláveis.</p>
+        </div>
+        {% endif %}
+
+        {% if not analysis.has_pricing %}
+        <div class="opportunity">
+            <h3>Oportunidade #2: Estrutura de Preços Clara</h3>
+            <p>Seu documento não parece ter uma estrutura de preços clara e pública. Facilitar o entendimento dos seus preços pode diminuir a fricção e acelerar o ciclo de vendas.</p>
+        </div>
+        {% else %}
+        <div class="success">
+            <h3>Ponto Forte: Transparência na Precificação</h3>
+            <p>Excelente! Encontramos informações sobre preços no seu documento. A transparência nos preços gera confiança e ajuda a qualificar os leads.</p>
+        </div>
+        {% endif %}
+
+        <div class="contact-section">
+            <h3>Próximo Passo: Agende uma Sessão Estratégica</h3>
+            <p>Gostou da análise? Nossa equipe pode te ajudar a implementar essas melhorias. Preencha o formulário abaixo para agendar uma conversa sem compromisso.</p>
+            <form action="{{ url_for('handle_contact') }}" method="post">
+                <input type="text" name="name" placeholder="Seu Nome" required>
+                <input type="email" name="email" placeholder="Seu Melhor E-mail" required>
+                <textarea name="message" rows="4" placeholder="Fale um pouco sobre seu negócio (opcional)"></textarea>
+                <input type="submit" value="Quero Agendar a Sessão">
+            </form>
+        </div>
+
+        <div class="preview-container">
+            <div class="preview-header">Pré-visualização da sua Página Web</div>
+            <iframe src="{{ url_for('converted_file', filename=html_filename) }}"></iframe>
+        </div>
+
+    </div>
+</body>
+</html>
