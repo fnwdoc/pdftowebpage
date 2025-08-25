@@ -72,7 +72,13 @@ def show_landing_page_preview(filename_base):
     except FileNotFoundError:
         return "Analysis data not found.", 404
 
-    return render_template('landing_page.html', structured_content=structured_content)
+    # Pre-process the hero subtitle for the template
+    hero_subtitle = ""
+    if structured_content and structured_content[0].get('content_text'):
+        # Take the first paragraph of the first section as the subtitle
+        hero_subtitle = structured_content[0]['content_text'].split('\n\n')[0]
+
+    return render_template('landing_page.html', structured_content=structured_content, hero_subtitle=hero_subtitle)
 
 
 @app.route('/contact', methods=['POST'])

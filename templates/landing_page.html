@@ -107,8 +107,8 @@
     {% if structured_content %}
         <header class="hero">
             <div class="container">
-                <h1>{{ structured_content[0].title }}</h1>
-                <p class="subtitle">{{ structured_content[0].content_text | split('\n\n') | first }}</p>
+                <h1>{{ structured_content[0].title if structured_content else "Sua Apresentação Web" }}</h1>
+                <p class="subtitle">{{ hero_subtitle }}</p>
             </div>
         </header>
 
