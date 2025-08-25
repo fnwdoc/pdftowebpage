@@ -164,6 +164,7 @@
             <h2>Próximo Passo: Agende uma Sessão Estratégica</h2>
             <p>Gostou da análise? Nossa equipe pode te ajudar a implementar essas melhorias. Preencha o formulário abaixo para agendar uma conversa sem compromisso.</p>
             <form action="{{ url_for('handle_contact') }}" method="post">
+                <input type="hidden" name="filename_base" value="{{ html_filename.split('.')[0] }}">
                 <input type="text" name="name" placeholder="Seu Nome" required>
                 <input type="email" name="email" placeholder="Seu Melhor E-mail" required>
                 <input type="tel" name="whatsapp" placeholder="Seu WhatsApp (com DDD)" required>
