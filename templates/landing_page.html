@@ -118,15 +118,7 @@
                 <div class="container">
                     <div class="content-card">
                         <h2>
-                            {% set dominant_criterion = section.analysis | max(key=lambda c: c.snippets|length if c.found else -1) %}
-                            {% set icon_key = 'scalability' %} {# Default icon #}
-                            {% for criterion, data in section.analysis.items() %}
-                                {% if data.found %}
-                                    {% set icon_key = criterion %}
-                                    {# This is not perfect, it will just take the last one found. A better logic would be needed for multiple matches #}
-                                {% endif %}
-                            {% endfor %}
-                            <div class="icon">{{ icons[icon_key] | safe }}</div>
+                            <div class="icon">{{ icons[section.dominant_criterion] | safe }}</div>
                             {{ section.title }}
                         </h2>
                         {% for paragraph in section.content_text.split('\n\n') %}

@@ -117,4 +117,14 @@ def parse_pdf_to_structured_content(doc):
         current_section['analysis'] = analyze_text_for_criteria(current_section['content_text'])
         structured_content.append(current_section)
 
+    # Second pass to determine dominant criterion for each section
+    for section in structured_content:
+        dominant_criterion = 'scalability' # Default icon
+        max_snippets = -1
+        for criterion, data in section['analysis'].items():
+            if data['found'] and len(data['snippets']) > max_snippets:
+                max_snippets = len(data['snippets'])
+                dominant_criterion = criterion
+        section['dominant_criterion'] = dominant_criterion
+
     return structured_content
