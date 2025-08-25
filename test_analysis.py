@@ -1,72 +1,91 @@
 import pytest
-import fitz  # PyMuPDF
-from analysis import analyze_presentation, EXPERT_KEYWORDS
+from unittest.mock import MagicMock
+from content_parser import parse_pdf_to_structured_content
 
-# Helper function to create a test PDF document in memory
-def create_test_doc(text):
-    """Creates an in-memory PDF with one page containing the given text."""
-    doc = fitz.open()
-    page = doc.new_page()
-    point = fitz.Point(50, 70)
-    page.insert_text(point, text)
+# --- Mocking PyMuPDF's Data Structures ---
+
+def create_mock_span(text, size, flags):
+    """Creates a mock span dictionary."""
+    return {"text": text, "size": size, "flags": flags}
+
+def create_mock_line(spans):
+    """Creates a mock line dictionary containing spans."""
+    return {"spans": spans}
+
+def create_mock_block(lines):
+    """Creates a mock block dictionary containing lines."""
+    return {"type": 0, "lines": lines}
+
+def create_mock_page(blocks):
+    """Creates a mock page object with a get_text method."""
+    page = MagicMock()
+    page.get_text.return_value = {"blocks": blocks}
+    return page
+
+def create_mock_doc(pages_content):
+    """Creates a mock document object that can be iterated over."""
+    doc = MagicMock()
+    doc.__iter__.return_value = pages_content
     return doc
 
-def test_no_criteria_found():
-    """Test with a generic text that shouldn't trigger any criteria."""
-    doc = create_test_doc("Este é um documento genérico sobre nossa empresa.")
-    result = analyze_presentation(doc)
-    for criterion, data in result.items():
-        assert not data['found'], f"Criterion '{criterion}' should not have been found."
-
-def test_keyword_found_and_highlighted():
-    """Test that a single keyword is found and highlighted correctly."""
-    doc = create_test_doc("Nossa solução de software é a melhor do mercado.")
-    result = analyze_presentation(doc)
-
-    assert result['scalability']['found']
-    snippets = result['scalability']['snippets']
-    assert len(snippets) == 1
-    assert snippets[0]['page'] == 1
-    assert '<strong>software</strong>' in snippets[0]['sentence']
-
-def test_multiple_keywords_for_same_criterion():
-    """Test that multiple keywords for the same criterion are found and highlighted."""
-    doc = create_test_doc("O preço do nosso produto é competitivo.")
-    result = analyze_presentation(doc)
-
-    assert result['predictability']['found']
-    snippets = result['predictability']['snippets']
-    assert len(snippets) == 1
-    # Check that both keywords are highlighted in the same sentence
-    assert '<strong>preço</strong>' in snippets[0]['sentence']
-
-    # The keyword 'produto' is for scalability, let's check that too
-    assert result['scalability']['found']
-    assert '<strong>produto</strong>' in result['scalability']['snippets'][0]['sentence']
-
-def test_phrase_keyword_matching():
-    """Test that multi-word phrases are matched correctly."""
-    doc = create_test_doc("Oferecemos um plano mensal com bom custo-benefício.")
-    result = analyze_presentation(doc)
-
-    assert result['recurrence']['found']
-    assert '<strong>plano mensal</strong>' in result['recurrence']['snippets'][0]['sentence']
-
-    assert result['predictability']['found']
-    assert '<strong>custo-benefício</strong>' in result['predictability']['snippets'][0]['sentence']
-
-def test_case_insensitivity():
-    """Test that keywords are found regardless of case."""
-    doc = create_test_doc("Analisamos o ROI e a MARGEM de lucro.")
-    result = analyze_presentation(doc)
-
-    assert result['profitability']['found']
-    assert '<strong>ROI</strong>' in result['profitability']['snippets'][0]['sentence']
-    assert '<strong>MARGEM</strong>' in result['profitability']['snippets'][0]['sentence']
+# --- New Tests Using Mocks ---
 
 def test_empty_document():
-    """Test that an empty document doesn't cause errors."""
-    doc = fitz.open() # Empty doc
-    result = analyze_presentation(doc)
-    for criterion, data in result.items():
-        assert not data['found']
+    """Test that a document with no text blocks returns an empty list."""
+    doc = create_mock_doc([])
+    result = parse_pdf_to_structured_content(doc)
+    assert result == []
+
+def test_structure_and_analysis():
+    """Test structural parsing and criteria analysis in one go."""
+    # This mock data represents a two-page PDF
+    mock_pages = [
+        # Page 1: A heading and a paragraph with a scalability keyword
+        create_mock_page([
+            create_mock_block([create_mock_line([create_mock_span("Sobre nosso Produto", 16, 16)])]),
+            create_mock_block([create_mock_line([create_mock_span("Nossa plataforma é inovadora.", 11, 4)])])
+        ]),
+        # Page 2: Another heading and a paragraph with a pricing keyword
+        create_mock_page([
+            create_mock_block([create_mock_line([create_mock_span("Nossos Preços", 16, 16)])]),
+            create_mock_block([create_mock_line([create_mock_span("O custo-benefício é o melhor do mercado.", 11, 4)])])
+        ])
+    ]
+    doc = create_mock_doc(mock_pages)
+    result = parse_pdf_to_structured_content(doc)
+
+    # Assertions for structure
+    assert len(result) == 2
+    assert result[0]['title'] == "Sobre nosso Produto"
+    assert result[0]['page'] == 1
+    assert "Nossa plataforma é inovadora" in result[0]['content_text']
+
+    assert result[1]['title'] == "Nossos Preços"
+    assert result[1]['page'] == 2
+    assert "custo-benefício" in result[1]['content_text']
+
+    # Assertions for analysis
+    # Section 1 should be about scalability
+    assert result[0]['analysis']['scalability']['found'] == True
+    assert result[0]['analysis']['predictability']['found'] == False
+    assert "<strong>plataforma</strong>" in result[0]['analysis']['scalability']['snippets'][0]
+
+    # Section 2 should be about predictability (pricing)
+    assert result[1]['analysis']['predictability']['found'] == True
+    assert "<strong>custo-benefício</strong>" in result[1]['analysis']['predictability']['snippets'][0]
+
+def test_no_headings_document():
+    """Test a document with only paragraph-style text."""
+    mock_pages = [
+        create_mock_page([
+            create_mock_block([create_mock_line([create_mock_span("Este é o primeiro parágrafo.", 12, 4)])]),
+            create_mock_block([create_mock_line([create_mock_span("Este é o segundo parágrafo.", 12, 4)])])
+        ])
+    ]
+    doc = create_mock_doc(mock_pages)
+    result = parse_pdf_to_structured_content(doc)
+
+    # Should be grouped into a single "Introduction" section
+    assert len(result) == 1
+    assert result[0]['title'] == "Introdução"
+    assert "primeiro parágrafo" in result[0]['content_text']
