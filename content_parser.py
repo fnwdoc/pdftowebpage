@@ -5,7 +5,7 @@ from collections import Counter
 # --- "Expert" Keyword Dictionary for 5 Criteria ---
 EXPERT_KEYWORDS = {
     'recurrence': ['assinatura', 'mensalidade', 'recorrente', 'plano mensal', 'anual', 'pagamento mensal'],
-    'predictability': ['preço', 'preços', 'custo', 'custos', 'custa', 'R$', '€', 'US$', 'investimento', 'custo-benefício'],
+    'predictability': ['preço', 'preços', 'custa', 'R$', '€', 'US$', 'custo-benefício'],
     'scalability': ['software', 'plataforma', 'automático', 'produto', 'API', 'escalar', 'sem limite'],
     'growth': ['expansão', 'crescer', 'crescimento', 'novo mercado', 'novos clientes', 'aumentar'],
     'profitability': ['lucro', 'lucratividade', 'margem', 'receita', 'EBITDA', 'ROI', 'retorno sobre o investimento']

@@ -14,87 +14,71 @@
             --text-primary: #1a202c;
             --text-secondary: #4a5568;
             --accent-primary: #3182ce;
+            --accent-highlight: #dd6b20;
             --border-color: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-secondary);
-            margin: 0;
-        }
-        .container {
-            max-width: 900px;
-            margin: auto;
-            padding: 0 2rem;
-        }
-        .section {
-            padding: 4rem 0;
-        }
-        .section:nth-of-type(even) {
-            background-color: var(--card-bg);
-        }
-        .section-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        .section-header h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-        .section-header p {
-            font-size: 1.125rem;
-            max-width: 600px;
-            margin: auto;
-        }
-        .hero {
-            background: linear-gradient(135deg, #4299e1, #3182ce);
-            color: white;
-            padding: 6rem 0;
-            text-align: center;
-        }
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 1rem;
-        }
-        .hero p {
-            font-size: 1.25rem;
-            opacity: 0.9;
-        }
-        .content-card {
-            background-color: var(--card-bg);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
-        }
-        .content-card h2 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-top: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .content-card .icon {
-            width: 28px;
-            height: 28px;
-            color: var(--accent-primary);
-        }
-        .content-card p {
-            line-height: 1.7;
-        }
+        /* Corporativo Theme (Default) */
+        .theme-corporate { --accent-primary: #3182ce; --accent-highlight: #2b6cb0; }
+        /* Moderno Theme */
+        .theme-modern { --accent-primary: #805ad5; --accent-highlight: #553c9a; }
+        /* Natureza Theme */
+        .theme-nature { --accent-primary: #38a169; --accent-highlight: #2f855a; }
+        /* Energia Theme */
+        .theme-energy { --accent-primary: #dd6b20; --accent-highlight: #c05621; }
+
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-secondary); margin: 0; transition: background-color 0.3s; }
+        .container { max-width: 900px; margin: auto; padding: 0 2rem; }
+        .section { padding: 4rem 0; }
+        .section:nth-of-type(even) { background-color: var(--card-bg); }
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-header h2 { font-size: 2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
+        .section-header p { font-size: 1.125rem; max-width: 600px; margin: auto; }
+        .hero { background: linear-gradient(135deg, #4299e1, var(--accent-primary)); color: white; padding: 6rem 0; text-align: center; transition: background 0.3s; }
+        .hero h1 { font-size: 3rem; font-weight: 700; color: white; margin-bottom: 1rem; }
+        .hero p { font-size: 1.25rem; opacity: 0.9; }
+        .content-card { background-color: var(--card-bg); border-radius: 0.75rem; padding: 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; }
+        .content-card h2 { font-size: 1.75rem; font-weight: 600; color: var(--text-primary); margin-top: 0; display: flex; align-items: center; gap: 0.75rem; }
+        .content-card .icon { width: 28px; height: 28px; color: var(--accent-primary); transition: color 0.3s; }
+        .content-card p { line-height: 1.7; }
+
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+        .pricing-card { background: var(--card-bg); border-radius: 0.75rem; padding: 2rem; box-shadow: var(--shadow); text-align: center; border-top: 5px solid var(--accent-primary); transition: border-color 0.3s, transform 0.2s; }
+        .pricing-card:hover { transform: translateY(-5px); }
+        .pricing-card.highlight { border-color: var(--accent-highlight); }
+        .pricing-card h3 { font-size: 1.5rem; color: var(--text-primary); margin-bottom: 1rem; }
+        .pricing-card .price { font-size: 2.5rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 1rem; transition: color 0.3s; }
+        .pricing-card .price span { font-size: 1rem; font-weight: 400; color: var(--text-secondary); }
+        .pricing-card ul { list-style: none; padding: 0; margin: 2rem 0; }
+        .pricing-card li { margin-bottom: 1rem; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; background: var(--accent-primary); color: white; text-decoration: none; font-weight: 600; transition: background-color 0.2s; }
+        .btn:hover { background-color: var(--accent-highlight); }
+        .btn-highlight { background: var(--accent-highlight); }
+        .btn-highlight:hover { opacity: 0.9; }
+
+        .theme-switcher { position: fixed; bottom: 1rem; right: 1rem; background: var(--card-bg); padding: 0.5rem; border-radius: 0.5rem; box-shadow: var(--shadow); z-index: 1000; }
+        .theme-switcher h4 { margin: 0 0 0.5rem; text-align: center; font-size: 0.8rem; color: var(--text-secondary); }
+        .theme-options { display: flex; gap: 0.5rem; }
+        .theme-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; cursor: pointer; box-shadow: 0 0 0 1px var(--border-color); }
+        .theme-btn.active { box-shadow: 0 0 0 2px var(--accent-primary); }
+        #theme-corporate { background-color: #3182ce; }
+        #theme-modern { background-color: #805ad5; }
+        #theme-nature { background-color: #38a169; }
+        #theme-energy { background-color: #dd6b20; }
     </style>
 </head>
-<body>
+<body class="theme-corporate">
+
+    <div class="theme-switcher">
+        <h4>Temas</h4>
+        <div class="theme-options">
+            <div class="theme-btn" id="theme-corporate" data-theme="theme-corporate"></div>
+            <div class="theme-btn" id="theme-modern" data-theme="theme-modern"></div>
+            <div class="theme-btn" id="theme-nature" data-theme="theme-nature"></div>
+            <div class="theme-btn" id="theme-energy" data-theme="theme-energy"></div>
+        </div>
+    </div>
 
     {% set icons = {
         'recurrence': '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991 0l-3.182-3.182a8.25 8.25 0 00-11.667 0l-3.181 3.182" /></svg>',
@@ -103,6 +87,15 @@
         'growth': '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-3.976 5.197m-4.21-4.21l-3.03 3.03" /></svg>',
         'profitability': '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75-.75v-.75M6 18.75a.75.75 0 00.75.75h.75a.75.75 0 00.75-.75v-9a.75.75 0 00-.75-.75h-.75a.75.75 0 00-.75.75v9z" /></svg>'
     } %}
+
+    {% set overall_analysis = {} %}
+    {% for section in structured_content %}
+        {% for criterion, data in section.analysis.items() %}
+            {% if data.found %}
+                {% set _ = overall_analysis.update({criterion: {'found': True}}) %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
 
     {% if structured_content %}
         <header class="hero">
@@ -128,6 +121,51 @@
                 </div>
             </section>
             {% endfor %}
+
+            {% if not overall_analysis.get('predictability', {}).get('found') %}
+            <section class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>Nossa Sugestão de Pacotes</h2>
+                        <p>Identificamos que sua apresentação não possui uma seção de preços clara. Incluir uma estrutura de pacotes pode aumentar a clareza e a conversão. Veja um exemplo:</p>
+                    </div>
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <h3>Bronze</h3>
+                            <div class="price">R$ 499<span>/mês</span></div>
+                            <ul>
+                                <li>Funcionalidade Essencial 1</li>
+                                <li>Funcionalidade Essencial 2</li>
+                                <li>Suporte por E-mail</li>
+                            </ul>
+                            <a href="#" class="btn">Começar Agora</a>
+                        </div>
+                        <div class="pricing-card highlight">
+                            <h3>Prata</h3>
+                            <div class="price">R$ 999<span>/mês</span></div>
+                            <ul>
+                                <li>Tudo do Bronze</li>
+                                <li>Funcionalidade Avançada 1</li>
+                                <li>Funcionalidade Avançada 2</li>
+                                <li>Suporte Prioritário</li>
+                            </ul>
+                            <a href="#" class="btn btn-highlight">Mais Popular</a>
+                        </div>
+                        <div class="pricing-card">
+                            <h3>Ouro</h3>
+                            <div class="price">R$ 1.999<span>/mês</span></div>
+                            <ul>
+                                <li>Tudo do Prata</li>
+                                <li>Funcionalidade Premium</li>
+                                <li>Gerente de Conta Dedicado</li>
+                                <li>Relatórios Avançados</li>
+                            </ul>
+                            <a href="#" class="btn">Fale Conosco</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
         </main>
     {% else %}
         <div class="container section">
@@ -135,6 +173,36 @@
             <p>Não foi possível extrair conteúdo estruturado deste PDF.</p>
         </div>
     {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeButtons = document.querySelectorAll('.theme-btn');
+            const body = document.body;
+            const themeClasses = ['theme-corporate', 'theme-modern', 'theme-nature', 'theme-energy'];
+
+            themeButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const theme = this.dataset.theme;
+
+                    // Remove any existing theme classes
+                    body.classList.remove(...themeClasses);
+
+                    // Add the new theme class
+                    body.classList.add(theme);
+
+                    // Update active button state
+                    themeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Set the default active button
+            const defaultTheme = Array.from(body.classList).find(c => themeClasses.includes(c));
+            if (defaultTheme) {
+                document.getElementById(defaultTheme).classList.add('active');
+            }
+        });
+    </script>
 
 </body>
 </html>
