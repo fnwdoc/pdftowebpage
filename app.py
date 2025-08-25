@@ -86,39 +86,36 @@ def handle_contact():
         'filename_base': request.form.get('filename_base')
     }
 
-    # --- Generate full context for the lead ---
-    analysis_details = {}
+    analysis_summary = {}
     try:
         results_path = os.path.join(app.config['RESULTS_FOLDER'], f"{form_data['filename_base']}.json")
         with open(results_path, "r", encoding="utf-8") as f:
             structured_analysis = json.load(f)
 
-        # Initialize details for CSV
-        for criterion in EXPERT_KEYWORDS.keys():
-            analysis_details[f'found_{criterion}'] = False
-            analysis_details[f'evidence_{criterion}'] = ''
+        summary = {c: False for c in EXPERT_KEYWORDS.keys()}
+        evidence = {f'evidence_{c}': '' for c in EXPERT_KEYWORDS.keys()}
 
-        # Populate details from analysis
         for section in structured_analysis:
             for criterion, data in section['analysis'].items():
                 if data['found']:
-                    analysis_details[f'found_{criterion}'] = True
-                    # Join snippets with a separator
+                    summary[criterion] = True
                     evidence_text = " | ".join([s.replace('<strong>', '').replace('</strong>', '') for s in data['snippets']])
-                    if analysis_details[f'evidence_{criterion}']:
-                        analysis_details[f'evidence_{criterion}'] += " | " + evidence_text
+                    if evidence[f'evidence_{criterion}']:
+                        evidence[f'evidence_{criterion}'] += " | " + evidence_text
                     else:
-                        analysis_details[f'evidence_{criterion}'] = evidence_text
+                        evidence[f'evidence_{criterion}'] = evidence_text
+
+        for criterion, found in summary.items():
+             analysis_summary[f'found_{criterion}'] = found
+        analysis_summary.update(evidence)
 
     except Exception as e:
         print(f"Error reading analysis file for CSV: {e}")
 
-    # Generate the permanent link to the diagnosis page
     with app.app_context():
         diagnosis_url = url_for('show_diagnosis', filename_base=form_data['filename_base'], _external=True)
 
-    # --- Save to CSV File ---
-    lead_data_to_save = {**form_data, **analysis_details, 'diagnosis_url': diagnosis_url}
+    lead_data_to_save = {**form_data, **analysis_summary, 'diagnosis_url': diagnosis_url}
 
     base_fieldnames = ['timestamp', 'name', 'email', 'whatsapp', 'message', 'filename_base', 'diagnosis_url']
     analysis_fieldnames = []
@@ -135,7 +132,8 @@ def handle_contact():
             writer.writeheader()
         writer.writerow(lead_data_to_save)
 
-    whatsapp_url = f"https://wa.me/5511911595028?text={quote(f'Olá, meu nome é {form_data[\"name\"]}. Vi o diagnóstico e gostaria de agendar.')}"
+    prefilled_text = f"Olá, meu nome é {form_data['name']}. Vi o diagnóstico e gostaria de agendar."
+    whatsapp_url = f"https://wa.me/5511911595028?text={quote(prefilled_text)}"
 
     return render_template('thank_you.html', whatsapp_url=whatsapp_url)
 
