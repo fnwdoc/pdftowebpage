@@ -30,18 +30,13 @@
             max-width: 900px;
             margin: auto;
         }
-        h1 {
-            font-size: 2.25rem;
-            font-weight: 700;
+        h1, h2, h3 {
             color: var(--text-primary);
             text-align: center;
-            margin-bottom: 0.5rem;
         }
-        .subtitle {
-            font-size: 1.125rem;
-            text-align: center;
-            margin-bottom: 3rem;
-        }
+        h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; font-weight: 600; }
+        .subtitle { font-size: 1.125rem; text-align: center; margin-bottom: 3rem; }
         .criterion-box {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -50,42 +45,17 @@
             box-shadow: var(--shadow);
             transition: transform 0.2s ease-in-out;
         }
-        .criterion-box:hover {
-            transform: translateY(-5px);
-        }
-        .criterion-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .criterion-header .icon {
-            width: 24px;
-            height: 24px;
-        }
-        .criterion-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .criterion-body {
-            padding: 1.5rem;
-            line-height: 1.6;
-        }
+        .criterion-box:hover { transform: translateY(-5px); }
+        .criterion-header { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); }
+        .criterion-header .icon { width: 24px; height: 24px; }
+        .criterion-header h3 { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary); }
+        .criterion-body { padding: 1.5rem; line-height: 1.6; }
         .opportunity { border-left: 5px solid var(--accent-opportunity); }
         .success { border-left: 5px solid var(--accent-success); }
         .evidence { margin-top: 1.5em; padding-top: 1.5em; border-top: 1px solid var(--border-color); }
         .evidence strong { color: var(--text-primary); }
         .evidence ul { list-style: none; margin: 0; padding: 0; margin-top: 1rem; }
-        .evidence li {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 0.75rem;
-            font-style: italic;
-        }
+        .evidence li { background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem; font-style: italic; }
         .evidence li strong { font-style: normal; color: var(--accent-primary); }
         .page-number { font-weight: 600; color: var(--text-secondary); font-size: 0.875em; font-style: normal; }
         .contact-section, .preview-container {
@@ -96,22 +66,15 @@
             margin-top: 3rem;
             box-shadow: var(--shadow);
         }
+        .preview-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .preview-header-flex h2 { margin: 0; text-align: left; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; background: var(--accent-primary); color: white; text-decoration: none; font-weight: 600; transition: background-color 0.2s; }
+        .btn:hover { background-color: #2b6cb0; }
+        .btn-publish { background-color: var(--accent-success); font-size: 0.9rem; padding: 0.5rem 1rem; }
+        .btn-publish:hover { background-color: #2f855a; }
         form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
-        form input, form textarea {
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            font-family: 'Poppins', sans-serif;
-        }
-        form input[type=submit] {
-            background-color: var(--accent-primary);
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            border: none;
-            transition: background-color 0.2s ease;
-        }
+        form input, form textarea { padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; font-size: 1rem; font-family: 'Poppins', sans-serif; }
+        form input[type=submit] { background-color: var(--accent-primary); color: white; cursor: pointer; font-weight: 600; border: none; transition: background-color 0.2s ease; }
         form input[type=submit]:hover { background-color: #2b6cb0; }
         iframe { width: 100%; height: 600px; border: 1px solid var(--border-color); border-radius: 0.5rem; }
     </style>
@@ -133,7 +96,7 @@
         {% for section in structured_content %}
             {% for criterion, data in section.analysis.items() %}
                 {% if data.found %}
-                    {% if not overall_analysis[criterion] %}
+                    {% if not overall_analysis.get(criterion) %}
                         {% set _ = overall_analysis.update({criterion: {'found': True, 'snippets': []}}) %}
                     {% endif %}
                     {% for snippet in data.snippets %}
@@ -144,13 +107,13 @@
         {% endfor %}
 
         {% for criterion, map_data in criteria_map.items() %}
-        <div class="criterion-box {% if overall_analysis[criterion] %}success{% else %}opportunity{% endif %}">
+        <div class="criterion-box {% if overall_analysis.get(criterion) %}success{% else %}opportunity{% endif %}">
             <div class="criterion-header">
                 <div class="icon">{{ map_data.icon | safe }}</div>
                 <h3>{{ map_data.title }}</h3>
             </div>
             <div class="criterion-body">
-                {% if overall_analysis[criterion] %}
+                {% if overall_analysis.get(criterion) %}
                     <p><strong>Ponto Forte:</strong> Sua apresentação já aborda este critério. Isso é ótimo para construir confiança e demonstrar valor.</p>
                     <div class="evidence">
                         <strong>Evidências encontradas:</strong>
@@ -168,7 +131,10 @@
         {% endfor %}
 
         <div class="preview-container">
-            <h2>Pré-visualização da sua Apresentação Web</h2>
+            <div class="preview-header-flex">
+                <h2>Pré-visualização da sua Apresentação Web</h2>
+                <a href="{{ url_for('publish_to_websim', filename_base=filename_base) }}" class="btn btn-publish" target="_blank">Publicar e Obter Link</a>
+            </div>
             <iframe src="{{ url_for('show_landing_page_preview', filename_base=filename_base) }}"></iframe>
         </div>
 
