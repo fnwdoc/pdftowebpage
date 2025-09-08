@@ -104,7 +104,7 @@ def publish_to_websim(filename_base):
 
     # Call the Websim API
     try:
-        response = requests.post("https://api.websim.ai/api/v1/create_site", json=websim_payload, timeout=30)
+        response = requests.post("https://api.websim.com/api/v1/sites", json=websim_payload, timeout=30)
         response.raise_for_status() # Raise an exception for bad status codes
         response_data = response.json()
 
